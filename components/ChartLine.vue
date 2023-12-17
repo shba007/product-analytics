@@ -4,7 +4,7 @@ import type { AggregatedData } from '~/pages/LineChart.vue';
 import { subDays, formatISO, format, parseISO } from 'date-fns'
 
 
-const { data } = defineProps<{
+const props = defineProps<{
   data: AggregatedData
 }>()
 
@@ -39,17 +39,17 @@ const chartOptions = ref({
   },
 })
 const chartData = computed(() => ({
-  labels: Object.keys(data).map(value => format(parseISO(value), 'd MMM')),
+  labels: Object.keys(props.data).map(value => format(parseISO(value), 'd MMM')),
   datasets: [{
     axis: 'y',
     borderColor: '#3259E8',
     // backgroundColor: '#3259E8',
     barThickness: 28,
-    data: Object.values(data),
+    data: Object.values(props.data),
   }],
 }))
 
-const total = computed(() => Object.values(data).reduce((acc, value) => acc + value, 0))
+const total = computed(() => Object.values(props.data).reduce((acc, value) => acc + value, 0))
 
 const activeDateRange = ref({ start: formatISO(subDays(new Date(), 1), { format: 'basic' }), end: formatISO(new Date(), { format: 'basic' }) })
 

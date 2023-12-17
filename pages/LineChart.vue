@@ -1,48 +1,13 @@
 <script setup lang="ts">
-import type { DataPoint, Feature, Filters } from './BarChart.vue';
-import { addDays, subDays, formatISO, parseISO, isAfter, isBefore } from 'date-fns'
+import { parseISO, isAfter, isBefore } from 'date-fns'
 
 export type AggregatedData = {
   [key: string]: number;
 };
 
-const data = ref<DataPoint[]>([{
-  date: subDays(new Date(), 1).toISOString(), age: 'teen', gender: 'male', feature: {
-    A: 65,
-    B: 317,
-    C: 909,
-    D: 804,
-    E: 556,
-    F: 934,
-  }
-}, {
-  date: new Date().toISOString(), age: 'teen', gender: 'female', feature: {
-    A: 100,
-    B: 317,
-    C: 909,
-    D: 804,
-    E: 556,
-    F: 934,
-  }
-}, {
-  date: addDays(new Date(), 1).toISOString(), age: 'adult', gender: 'male', feature: {
-    A: 637,
-    B: 778,
-    C: 576,
-    D: 435,
-    E: 596,
-    F: 451,
-  },
-},])
+const dataStore = useData()
+const { data, filters } = storeToRefs(dataStore)
 
-const filters = ref<Filters>({
-  age: 'all',
-  gender: 'all',
-  date: {
-    start: formatISO(subDays(new Date(), 1), { format: 'basic' }),
-    end: formatISO(addDays(new Date(), 2), { format: 'basic' })
-  }
-})
 const selectedFeature = ref<Feature>('A')
 
 const aggregatedData = computed<AggregatedData>(() => data.value.reduce((acc, value) => {

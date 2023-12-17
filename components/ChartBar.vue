@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { Bar } from 'vue-chartjs'
 import type { AggregatedData } from '~/pages/BarChart.vue';
-import { subDays, formatISO, format, parseISO } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 
-
-const { data } = defineProps<{
+const props = defineProps<{
   data: AggregatedData
 }>()
+
+const dataStore = useData()
+const { filters } = storeToRefs(dataStore)
+const date = toRef(() => filters.value.date)
 
 const chartOptions = ref({
   responsive: true,
@@ -46,50 +49,38 @@ const chartOptions = ref({
   },
 })
 
-const total = computed(() => Object.values(data).reduce((acc, value) => acc + value, 0))
-const average = computed(() => total.value / Object.values(data).length)
+const total = computed(() => Object.values(props.data).reduce((acc, value) => acc + value, 0))
+const average = computed(() => total.value / Object.values(props.data).length)
 
 const chartData = computed(() => ({
-  labels: Object.keys(data),
+  labels: Object.keys(props.data),
   datasets: [{
     axis: 'y',
     backgroundColor: '#3259E8',
     barThickness: 28,
-    data: Object.values(data),
+    data: Object.values(props.data),
   }],
 }))
 
 function handleBarClick(barIndex: number) {
   console.log("bar Clicked", barIndex)
 }
-
-const activeDateRange = ref({ start: formatISO(subDays(new Date(), 1), { format: 'basic' }), end: formatISO(new Date(), { format: 'basic' }) })
-
-function handleDateRangeChange(preset: 'D' | 'W' | 'M' | 'Y') {
-  const substractMap = {
-    'D': 1,
-    'W': 7,
-    'M': 30,
-    'Y': 365
-  }
-  activeDateRange.value.start = formatISO(subDays(new Date(), substractMap[preset]), { format: 'basic' })
-}
 </script>
 
 <template>
   <section class="rounded-xl p-9 bg-dark-500">
-    <div class="grid grid-flow-col grid-cols-[auto_min-content] grid-rows-3">
+    <div class="grid grid-flow-col grid-cols-[auto_min-content] grid-rows-[repeat(3,min-content)] gap-y-4">
       <span class="block text-xl">Time Spent per Feature</span>
       <div class="flex items-end gap-3">
         <span class="block text-3xl">{{ total }}</span>
         <span>Unit Total Time Spent</span>
       </div>
-      <div>Filters</div>
-      <DatePreset @change="handleDateRangeChange" />
-      <div class="justify-self-end self-center">
-        <time :datetime="activeDateRange.start">{{ format(parseISO(activeDateRange.start), "d MMM") }}</time>
+      <Filters />
+      <!-- <DatePreset @change="handleDateRangeChange" /> -->
+      <div class="justify-self-end self-center whitespace-nowrap">
+        <time :datetime="date.start">{{ format(parseISO(date.start), "d MMM") }}</time>
         -
-        <time :datetime="activeDateRange.end">{{ format(parseISO(activeDateRange.end), "d MMM yyyy") }}</time>
+        <time :datetime="date.end">{{ format(parseISO(date.end), "d MMM yyyy") }}</time>
       </div>
     </div>
     <div class="w-full aspect-[2]">
